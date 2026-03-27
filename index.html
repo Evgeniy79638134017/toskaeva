@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>BizChain Map — Таскаева Наталья · Логопед</title>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+--bg:#f0f4f2;--card:rgba(255,255,255,0.75);--border:rgba(15,186,106,0.08);
+--text:#1a2332;--text2:#4a5568;--text3:#94a3b8;
+--green:#1db87a;--green2:#0fa06a;--yellow:#e8a308;--red:#e04848;
+--purple:#7c3aed;--blue:#2196f3;--teal:#0d9488;--amber:#d97706;--orange:#f97316;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);overflow-x:hidden;min-height:100vh}
+canvas#neuralBg{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none;opacity:.12}
+.wrap{position:relative;z-index:1;max-width:1200px;margin:0 auto;padding:20px 16px 60px}
+
+/* HEADER */
+.header{text-align:center;margin-bottom:20px}
+.logo{display:inline-flex;align-items:center;gap:8px;margin-bottom:8px}
+.logo-circle{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#1db87a,#06b6d4,#2196f3);display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:13px;font-family:'Unbounded'}
+.logo-text{font-family:'Unbounded';font-weight:700;font-size:13px;letter-spacing:.04em;color:var(--text2)}
+.main-title{font-family:'Unbounded';font-weight:700;font-size:26px;background:linear-gradient(135deg,#1db87a,#06b6d4,#2196f3);background-size:200% 200%;-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:grad 4s ease-in-out infinite}
+@keyframes grad{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
+.sub{font-size:12px;color:var(--text3);margin:4px 0 8px}
+.ai-tag{display:inline-flex;align-items:center;gap:6px;background:rgba(29,184,122,.07);border:1px solid rgba(29,184,122,.14);border-radius:20px;padding:4px 14px 4px 10px;font-size:11px;font-weight:600;color:var(--green)}
+.orb{width:8px;height:8px;border-radius:50%;background:radial-gradient(circle at 30% 30%,#4ade80,#1db87a);box-shadow:0 0 8px rgba(29,184,122,.4);animation:pulse 2s ease-in-out infinite}
+@keyframes pulse{0%,100%{box-shadow:0 0 6px rgba(29,184,122,.3);transform:scale(1)}50%{box-shadow:0 0 14px rgba(29,184,122,.5);transform:scale(1.15)}}
+
+/* BUSINESS CARD */
+.bcard{background:var(--card);backdrop-filter:blur(16px);border:1px solid var(--border);border-radius:16px;padding:20px 24px;margin-bottom:16px;box-shadow:0 2px 12px rgba(15,186,106,.04)}
+.bcard-title{font-family:'Unbounded';font-weight:700;font-size:14px;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.bcard-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px 20px}
+.bcard-item{font-size:13px;color:var(--text2)}
+.bcard-item b{display:block;font-family:'JetBrains Mono',monospace;font-weight:700;font-size:16px;color:var(--text);margin-bottom:2px}
+.bcard-item small{font-size:11px;color:var(--text3)}
+
+/* TASKS */
+.tasks{background:var(--card);backdrop-filter:blur(16px);border:1px solid var(--border);border-radius:14px;padding:16px 20px;margin-bottom:16px}
+.tasks-title{font-family:'Unbounded';font-weight:700;font-size:11px;letter-spacing:.04em;color:var(--text2);margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.tasks-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:8px}
+.tasks-grid div{font-size:12px;color:var(--text2);line-height:1.5}
+
+/* GOAL PANEL */
+.goal{background:var(--card);backdrop-filter:blur(16px);border:1px solid rgba(15,186,106,.12);border-radius:14px;padding:12px 20px;margin-bottom:16px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;box-shadow:0 2px 8px rgba(15,186,106,.06)}
+.goal-lbl{font-family:'Unbounded';font-weight:700;font-size:11px;color:var(--green2);letter-spacing:.06em}
+.goal-vals{font-size:14px;color:var(--text)}
+.goal-vals b{font-family:'JetBrains Mono',monospace;font-weight:700;color:var(--green2)}
+.goal-sep{color:var(--text3);margin:0 4px}
+
+/* STAT BADGES */
+.stats{display:flex;gap:10px;justify-content:center;margin-bottom:14px;flex-wrap:wrap}
+.stat{display:flex;align-items:center;gap:6px;background:var(--card);backdrop-filter:blur(12px);border:1px solid var(--border);border-radius:10px;padding:8px 14px;font-size:12px;font-weight:600}
+.stat-dot{width:10px;height:10px;border-radius:50%}
+.stat-dot.g{background:var(--green);box-shadow:0 0 8px rgba(29,184,122,.35)}
+.stat-dot.y{background:var(--yellow);box-shadow:0 0 8px rgba(232,163,8,.3)}
+.stat-dot.r{background:var(--red);box-shadow:0 0 8px rgba(224,72,72,.25)}
+
+/* CHAIN */
+.chain{background:var(--card);backdrop-filter:blur(16px);border:1px solid var(--border);border-radius:16px;padding:16px 18px 14px;margin-bottom:10px;box-shadow:0 1px 3px rgba(0,0,0,.02),0 4px 16px rgba(15,186,106,.03),inset 0 1px 0 rgba(255,255,255,.8);transition:transform .25s,box-shadow .25s;position:relative;opacity:0;transform:translateY(18px);animation:rowIn .5s forwards}
+.chain:hover{transform:translateY(-2px);box-shadow:0 4px 20px rgba(15,186,106,.07)}
+@keyframes rowIn{to{opacity:1;transform:translateY(0)}}
+.chain:nth-child(1){animation-delay:0s}.chain:nth-child(2){animation-delay:.1s}.chain:nth-child(3){animation-delay:.2s}.chain:nth-child(4){animation-delay:.3s}.chain:nth-child(5){animation-delay:.4s}
+.chain-accent{position:absolute;left:0;top:0;bottom:0;width:5px;border-radius:16px 0 0 16px}
+.chain-head{display:flex;align-items:center;gap:10px;margin-bottom:10px;padding-left:10px}
+.chain-name{font-family:'Unbounded';font-weight:700;font-size:11px;letter-spacing:.06em;text-transform:uppercase}
+.chain-pct{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:600;padding:2px 8px;border-radius:8px}
+.steps{display:flex;align-items:center;gap:0;padding-left:10px;overflow-x:auto}
+.step{flex:0 0 auto;min-width:108px;max-width:135px;padding:10px 10px 18px;border-radius:12px;font-size:11px;font-weight:600;line-height:1.35;cursor:pointer;position:relative;transition:transform .22s,box-shadow .22s;text-align:center;overflow:hidden}
+.step::after{content:'';position:absolute;top:0;left:-100%;width:100%;height:100%;background:linear-gradient(105deg,transparent 40%,rgba(255,255,255,.35) 45%,rgba(255,255,255,.55) 50%,rgba(255,255,255,.35) 55%,transparent 60%);transition:left 0s;pointer-events:none}
+.step:hover::after{left:100%;transition:left .7s ease}
+.step:hover{transform:translateY(-4px)}
+.step::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:0;height:2px;border-radius:2px;transition:width .35s}
+.step:hover::before{width:50px}
+.step.full{background:linear-gradient(180deg,rgba(15,186,106,.10) 0%,rgba(15,186,106,.03) 100%);border:1px solid rgba(15,186,106,.18);color:#0e7a4f}
+.step.full:hover{box-shadow:0 8px 28px rgba(15,186,106,.12)}
+.step.full::before{background:linear-gradient(90deg,transparent,#1db87a,#06b6d4,transparent)}
+.step.boost{background:linear-gradient(180deg,rgba(232,163,8,.10) 0%,rgba(232,163,8,.03) 100%);border:1px solid rgba(232,163,8,.18);color:#9a6c06}
+.step.boost:hover{box-shadow:0 8px 28px rgba(232,163,8,.10)}
+.step.boost::before{background:linear-gradient(90deg,transparent,#e8a308,#f97316,transparent)}
+.step.human{background:linear-gradient(180deg,rgba(224,72,72,.08) 0%,rgba(224,72,72,.02) 100%);border:1px solid rgba(224,72,72,.15);color:#a83232}
+.step.human:hover{box-shadow:0 8px 28px rgba(224,72,72,.08)}
+.step.human::before{background:linear-gradient(90deg,transparent,#e04848,#f97316,transparent)}
+.step-agent{position:absolute;bottom:3px;right:4px;font-size:8px;font-weight:600;background:rgba(33,150,243,.1);border:1px solid rgba(33,150,243,.2);border-radius:6px;padding:1px 5px;color:var(--blue);white-space:nowrap}
+.hole{position:absolute;top:3px;left:4px;font-size:7px;font-weight:700;background:rgba(224,72,72,.08);color:var(--red);padding:1px 5px;border-radius:5px;border:1px dashed rgba(224,72,72,.2)}
+.arrow{flex:0 0 24px;display:flex;align-items:center;justify-content:center}
+.arrow svg{width:22px;height:18px}
+
+/* CONNS */
+.conns{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:8px 0 16px}
+.conn{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.6);backdrop-filter:blur(8px);border:1px solid rgba(15,186,106,.1);border-radius:10px;padding:5px 12px;font-size:10.5px;font-weight:600;color:var(--text2);cursor:pointer;transition:transform .2s,box-shadow .2s}
+.conn:hover{transform:translateY(-2px);box-shadow:0 4px 12px rgba(0,0,0,.06)}
+.conn-dot{width:8px;height:8px;border-radius:50%;box-shadow:0 0 8px currentColor}
+
+/* BRANCHES */
+.branches{background:var(--card);backdrop-filter:blur(16px);border:1px solid var(--border);border-radius:16px;padding:20px;margin-bottom:16px}
+.branches-title{font-family:'Unbounded';font-weight:700;font-size:13px;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.branches-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px}
+.branch-card{border-radius:12px;padding:14px;border-left:4px solid}
+.branch-name{font-family:'Unbounded';font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px}
+.branch-pot{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:15px;color:var(--green2);margin-bottom:4px}
+.branch-desc{font-size:11px;color:var(--text2);line-height:1.5}
+
+/* POTENTIALS */
+.pots{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin-bottom:16px}
+.pot-card{background:var(--card);backdrop-filter:blur(12px);border-radius:14px;padding:14px;border-top:3px solid}
+.pot-name{font-family:'Unbounded';font-weight:700;font-size:10px;text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px}
+.pot-val{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:16px;color:var(--green2);margin-bottom:4px}
+.pot-desc{font-size:11px;color:var(--text2)}
+
+/* TOTALS */
+.totals{background:var(--card);backdrop-filter:blur(16px);border:1px solid var(--border);border-radius:16px;padding:20px;margin-bottom:16px}
+.totals-title{font-family:'Unbounded';font-weight:700;font-size:13px;margin-bottom:14px}
+.totals-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:14px;text-align:center}
+.total-num{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:24px;color:var(--green2)}
+.total-lbl{font-size:11px;color:var(--text2);margin-top:2px}
+
+/* DISCLAIMER */
+.disc{background:rgba(232,163,8,.04);border:1px solid rgba(232,163,8,.2);border-radius:14px;padding:14px 18px;margin-bottom:16px;font-size:12px;color:var(--text2);line-height:1.6}
+.disc b{color:var(--amber)}
+
+/* LEGEND + FOOTER */
+.legend{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;margin-bottom:14px}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2)}
+.legend-dot{width:10px;height:10px;border-radius:50%}
+.legend-dot.g{background:var(--green);box-shadow:0 0 8px rgba(29,184,122,.35)}
+.legend-dot.y{background:var(--yellow);box-shadow:0 0 8px rgba(232,163,8,.3)}
+.legend-dot.r{background:var(--red);box-shadow:0 0 8px rgba(224,72,72,.25)}
+.footer{text-align:center;font-size:11px;color:var(--text3);line-height:1.6;margin-top:12px}
+
+/* MODAL */
+.overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(15,30,22,.25);backdrop-filter:blur(6px);z-index:100;display:none;align-items:center;justify-content:center;padding:20px}
+.overlay.show{display:flex}
+.modal{background:rgba(255,255,255,.92);backdrop-filter:blur(20px);border:1px solid rgba(15,186,106,.1);border-radius:20px;box-shadow:0 24px 64px rgba(0,0,0,.08);max-width:540px;width:100%;max-height:85vh;overflow-y:auto;padding:24px 22px 20px;animation:mIn .28s}
+@keyframes mIn{from{opacity:0;transform:scale(.95) translateY(10px)}to{opacity:1;transform:scale(1) translateY(0)}}
+.modal::-webkit-scrollbar{width:5px}.modal::-webkit-scrollbar-thumb{background:rgba(15,186,106,.15);border-radius:4px}
+.mclose{position:sticky;top:0;float:right;width:30px;height:30px;border-radius:50%;border:none;background:rgba(0,0,0,.04);font-size:18px;cursor:pointer;color:var(--text3);display:flex;align-items:center;justify-content:center;z-index:2}
+.mclose:hover{background:rgba(0,0,0,.08)}
+.mbadge{display:inline-block;font-size:11px;font-weight:700;padding:4px 12px;border-radius:8px;margin-bottom:8px}
+.mbadge.full{background:rgba(15,186,106,.1);color:var(--green2)}
+.mbadge.boost{background:rgba(232,163,8,.1);color:#b07d06}
+.mbadge.human{background:rgba(224,72,72,.08);color:var(--red)}
+#mTitle{font-family:'Unbounded';font-weight:700;font-size:17px;color:var(--text);margin-bottom:6px}
+.mchain{font-size:12px;color:var(--text3);margin-bottom:10px;font-weight:600}
+.mdesc{font-size:13px;color:var(--text2);line-height:1.65;margin-bottom:6px}
+.mquote{font-size:13px;font-style:italic;color:var(--text2);padding:8px 12px;margin:8px 0;border-left:3px solid var(--green);background:rgba(15,186,106,.04);border-radius:0 8px 8px 0}
+.msrc{font-size:10.5px;color:var(--text3);margin-bottom:4px}
+.msec{font-size:10px;font-weight:700;color:var(--text3);letter-spacing:.08em;text-transform:uppercase;margin:16px 0 8px;padding-top:12px;border-top:1px solid var(--border)}
+.munit{padding:10px 12px;background:rgba(0,0,0,.02);border-radius:10px}
+.munit-row{font-size:13px;color:var(--text2);padding:4px 0;display:flex;gap:8px}
+.munit-row span{flex-shrink:0}
+.munit-row.hl{font-weight:600;color:var(--green2)}
+.mai{padding:10px 12px;border-radius:10px;margin-top:4px}
+.mai.full{background:rgba(15,186,106,.04);border-left:3px solid var(--green)}
+.mai.boost{background:rgba(232,163,8,.04);border-left:3px solid var(--yellow)}
+.mai.human{background:rgba(224,72,72,.03);border-left:3px solid var(--red)}
+.mai-t{font-size:11px;font-weight:700;margin-bottom:4px}
+.mai-txt{font-size:12.5px;color:var(--text2);line-height:1.6}
+.magent{padding:10px 12px;background:rgba(33,150,243,.04);border-radius:10px}
+.magent-name{font-weight:700;font-size:14px;color:var(--text);margin-bottom:4px}
+.magent-desc{font-size:12.5px;color:var(--text2);line-height:1.6}
+.magent-mod{font-size:11px;color:var(--blue);margin-top:6px;font-weight:600}
+.mbranch{padding:10px 12px;background:rgba(15,186,106,.04);border-radius:10px}
+.mbranch-name{font-weight:700;font-size:14px;color:var(--green2)}
+.mbranch-pot{font-family:'JetBrains Mono',monospace;font-size:13px;margin:4px 0}
+.mbranch-link{font-size:12.5px;color:var(--text2);line-height:1.6}
+.mtool{padding:10px 12px;background:rgba(124,58,237,.04);border-radius:10px;border-left:3px solid var(--purple)}
+.mtool-name{font-weight:700;font-size:14px;color:var(--purple)}
+.mtool-steps{font-size:12.5px;color:var(--text2);line-height:1.7;margin:6px 0}
+.mtool-time{font-size:11px;color:var(--text3)}
+.mgoal{padding:10px 12px}
+.mgoal-name{font-weight:700;font-size:13px;color:var(--text);margin-bottom:8px}
+.mgoal-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.mgoal-before,.mgoal-after{padding:8px 10px;border-radius:8px;font-size:12px;line-height:1.5}
+.mgoal-before{background:rgba(224,72,72,.05);color:var(--red)}
+.mgoal-after{background:rgba(15,186,106,.05);color:var(--green2)}
+.mgoal-lbl{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px}
+.mlinks{display:flex;flex-direction:column;gap:8px}
+.ml{display:flex;gap:10px;align-items:flex-start}
+.ml-dot{width:10px;height:10px;border-radius:50%;margin-top:3px;flex-shrink:0;box-shadow:0 0 6px currentColor}
+.ml-lbl{font-size:12px;font-weight:700}
+.ml-txt{font-size:12px;color:var(--text2)}
+.ml-sub{font-size:10px;color:var(--text3);font-weight:600;margin-top:2px}
+@media(max-width:700px){.main-title{font-size:20px}.step{min-width:88px;max-width:110px;font-size:10px;padding:8px 6px 16px}.bcard-grid{grid-template-columns:1fr 1fr}.totals-grid{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+<canvas id="neuralBg"></canvas>
+<div class="wrap">
+
+<!-- HEADER -->
+<div class="header">
+<div class="logo"><div class="logo-circle">И</div><span class="logo-text">ИИЩЕНКО LAB</span></div>
+<div class="main-title">BizChain Map</div>
+<div class="sub">AI-Powered Business Map · Визуальный анализ бизнес-процессов с ИИ-аудитом</div>
+<div class="sub" style="font-size:14px;font-weight:600;color:var(--text)">Таскаева Наталья · Логопед · Благовещенск</div>
+<div class="ai-tag"><div class="orb"></div> AI-аудит потенциала</div>
+</div>
+
+<!-- BUSINESS CARD -->
+<div class="bcard">
+<div class="bcard-title">📋 Карточка бизнеса</div>
+<div class="bcard-grid">
+<div class="bcard-item"><b>Таскаева Наталья</b>Логопед, 5 лет<small>Звукопостановка · Дисграфия · Массаж</small></div>
+<div class="bcard-item"><b>Благовещенск</b>Офлайн-кабинет<small>Работает одна, нанимать не планирует</small></div>
+<div class="bcard-item"><b>~130 000 ₽/мес</b>Текущий доход<small>Потолок модели: ~155 000 ₽</small></div>
+<div class="bcard-item"><b>15–20 детей</b>Одновременно в работе<small>5 занятий/день × 5 дней</small></div>
+<div class="bcard-item"><b>1 400 ₽</b>За занятие (30 мин)<small>Диагностика 1 400–1 500 ₽</small></div>
+<div class="bcard-item"><b>928 подп. IG</b>Instagram (не ведётся)<small>ВК 0, TG 0</small></div>
+<div class="bcard-item"><b>~20 отзывов</b>2ГИС<small>Лидер — 127 оценок (5.0★)</small></div>
+<div class="bcard-item"><b>200–300 детей</b>Опыт за 5 лет<small>90% результат + нейроподход</small></div>
+</div>
+</div>
+
+<!-- TASKS -->
+<div class="tasks">
+<div class="tasks-title">🎯 6 ЗАДАЧ ДЛЯ КАРТЫ</div>
+<div class="tasks-grid">
+<div>1. Оживить 928 подписчиков — система контента (0 → 12+ постов/мес)</div>
+<div>2. Раскачать 2ГИС до 100+ отзывов (сейчас ~20)</div>
+<div>3. Выстроить систему удержания — рассылки, контрольные, рефералы</div>
+<div>4. Создать продуктовую линейку (гайды, курс, консультации для мам)</div>
+<div>5. Запустить онлайн-направление (+10-15 клиентов/мес за пределами города)</div>
+<div>6. Преодолеть потолок дохода: 130К → 300-350К ₽/мес через новые форматы</div>
+</div>
+</div>
+
+<!-- GOAL PANEL -->
+<div class="goal">
+<div class="goal-lbl">🎯 ЦЕЛЬ</div>
+<div class="goal-vals">
+<b>25</b> офлайн + <b>10–15</b> онлайн клиентов/мес<span class="goal-sep">•</span>
+Средняя цена <b>1 800 ₽</b><span class="goal-sep">•</span>
+Доход <b>300–350 тыс</b> ₽/мес<span class="goal-sep">•</span>
+<b>100+</b> отзывов 2ГИС
+</div>
+</div>
+
+<!-- STATS -->
+<div class="stats">
+<div class="stat"><div class="stat-dot g"></div>12 ИИ сам (48%)</div>
+<div class="stat"><div class="stat-dot y"></div>9 ИИ ускоряет (36%)</div>
+<div class="stat"><div class="stat-dot r"></div>4 Человек (16%)</div>
+</div>
+
+<!-- CHAINS -->
+<div id="chains"></div>
+
+<!-- CONNS -->
+<div class="conns" id="conns"></div>
+
+<!-- BRANCHES -->
+<div class="branches">
+<div class="branches-title">🚀 ВЕТКИ РОСТА — ₽-ПОТЕНЦИАЛ</div>
+<div class="branches-grid">
+<div class="branch-card" style="background:rgba(29,184,122,.04);border-color:var(--green)"><div class="branch-name" style="color:var(--green2)">Контент-машина</div><div class="branch-pot">+600К–1.2М ₽/год</div><div class="branch-desc">0 постов → 12+/мес. Оживить 928 подписчиков. Голосовое → ИИ → пост за 3 мин</div></div>
+<div class="branch-card" style="background:rgba(33,150,243,.04);border-color:var(--blue)"><div class="branch-name" style="color:var(--blue)">Лидогенерация</div><div class="branch-pot">+300К–600К ₽/год</div><div class="branch-desc">2ГИС до 100+ отзывов. Партнёрства с 5-7 врачами. Соцсети → заявки</div></div>
+<div class="branch-card" style="background:rgba(124,58,237,.04);border-color:var(--purple)"><div class="branch-name" style="color:var(--purple)">Конверсия + Продуктовая линейка</div><div class="branch-pot">+400К–800К ₽/год</div><div class="branch-desc">Пакеты, допродажи, повышение цены 1400→1800₽. Гайд 490₽ → курс 4900₽</div></div>
+<div class="branch-card" style="background:rgba(224,72,72,.04);border-color:var(--red)"><div class="branch-name" style="color:var(--red)">Удержание / LTV</div><div class="branch-pot">+200К–400К ₽/год</div><div class="branch-desc">Рассылки, контрольные через 3 мес, рефералы. База контактов (не удалять!)</div></div>
+<div class="branch-card" style="background:rgba(232,163,8,.04);border-color:var(--yellow)"><div class="branch-name" style="color:var(--amber)">Онлайн-продукты</div><div class="branch-pot">+500К–1.5М ₽/год</div><div class="branch-desc">Курс «Запуск речи», гайды для мам, видеоконсультации. Снимает географический потолок</div></div>
+</div>
+</div>
+
+<!-- POTENTIALS BY CHAIN -->
+<div class="pots">
+<div class="pot-card" style="border-color:var(--green)"><div class="pot-name" style="color:var(--green2)">ПРИВЛЕЧЕНИЕ</div><div class="pot-val">+300К–600К ₽/год</div><div class="pot-desc">Соцсети + 2ГИС + партнёрства с врачами</div></div>
+<div class="pot-card" style="border-color:var(--purple)"><div class="pot-name" style="color:var(--purple)">ПРОДАЖА</div><div class="pot-val">+400К–800К ₽/год</div><div class="pot-desc">Пакеты + допродажи + повышение цены</div></div>
+<div class="pot-card" style="border-color:var(--yellow)"><div class="pot-name" style="color:var(--amber)">ИСПОЛНЕНИЕ</div><div class="pot-val">+200К–400К ₽/год</div><div class="pot-desc">Система ДЗ + карты прогресса + отчёты мамам</div></div>
+<div class="pot-card" style="border-color:var(--blue)"><div class="pot-name" style="color:var(--blue)">КОНТЕНТ</div><div class="pot-val">+600К–1.2М ₽/год</div><div class="pot-desc">Из дыры → система 12+ постов/мес + Reels + FAQ</div></div>
+<div class="pot-card" style="border-color:var(--red)"><div class="pot-name" style="color:var(--red)">УДЕРЖАНИЕ</div><div class="pot-val">+200К–400К ₽/год</div><div class="pot-desc">Рассылки + контрольные + рефералы + допродажи</div></div>
+</div>
+
+<!-- TOTALS -->
+<div class="totals">
+<div class="totals-title">🏆 Итоговый потенциал Натальи</div>
+<div class="totals-grid">
+<div><div class="total-num">+1.7–3.4 млн</div><div class="total-lbl">₽/год потенциал</div></div>
+<div><div class="total-num">130К → 300К</div><div class="total-lbl">₽/мес рост дохода</div></div>
+<div><div class="total-num">-15 ч</div><div class="total-lbl">в неделю рутины</div></div>
+<div><div class="total-num">48%</div><div class="total-lbl">ИИ-потенциал (12/25)</div></div>
+<div><div class="total-num">9 дыр</div><div class="total-lbl">→ закрываются агентами</div></div>
+<div><div class="total-num">5</div><div class="total-lbl">направлений роста с ₽</div></div>
+</div>
+</div>
+
+<!-- DISCLAIMER -->
+<div class="disc">⚠️ <b>Дисклеймер:</b> Все цифры являются ориентировочными прогнозами на основе данных анкеты, диагностики и анализа рынка логопедических услуг Благовещенска (март 2026). Фактические результаты зависят от реализации стратегии, скорости внедрения и рыночных условий. Юнит-экономика рассчитана как потенциал при системном внедрении рекомендаций. Итоговый потенциал +1.7–3.4 млн ₽/год — суммарный по всем направлениям при реализации 75–100% плана.</div>
+
+<!-- LEGEND -->
+<div class="legend">
+<div class="legend-item"><div class="legend-dot g"></div>ИИ автоматизирует полностью</div>
+<div class="legend-item"><div class="legend-dot y"></div>ИИ ускоряет, человек контролирует</div>
+<div class="legend-item"><div class="legend-dot r"></div>Требует живого человека</div>
+</div>
+
+<!-- FOOTER -->
+<div class="footer">© 2026 Центр развития бизнеса «ИИщенко LAB» · BizChain Map v4.0 · Подготовлено для Таскаевой Натальи</div>
+
+</div>
+
+<!-- MODAL -->
+<div class="overlay" id="overlay" onclick="if(event.target===this)closeModal()">
+<div class="modal">
+<button class="mclose" onclick="closeModal()">✕</button>
+<div id="mBadge" class="mbadge"></div>
+<div id="mTitle"></div>
+<div id="mBody"></div>
+</div>
+</div>
+
+<script>
+// NEURAL BG
+!function(){const cv=document.getElementById('neuralBg'),ctx=cv.getContext('2d');let w,h,nodes=[];function resize(){w=cv.width=innerWidth;h=cv.height=innerHeight;nodes=[];for(let i=0;i<50;i++)nodes.push({x:Math.random()*w,y:Math.random()*h,vx:(Math.random()-.5)*.3,vy:(Math.random()-.5)*.3,r:Math.random()*2+1})}function draw(){ctx.clearRect(0,0,w,h);nodes.forEach(n=>{n.x+=n.vx;n.y+=n.vy;if(n.x<0||n.x>w)n.vx*=-1;if(n.y<0||n.y>h)n.vy*=-1;ctx.beginPath();ctx.arc(n.x,n.y,n.r,0,Math.PI*2);ctx.fillStyle='rgba(29,184,122,0.4)';ctx.fill()});for(let i=0;i<nodes.length;i++)for(let j=i+1;j<nodes.length;j++){const dx=nodes[i].x-nodes[j].x,dy=nodes[i].y-nodes[j].y,d=Math.sqrt(dx*dx+dy*dy);if(d<160){ctx.beginPath();ctx.moveTo(nodes[i].x,nodes[i].y);ctx.lineTo(nodes[j].x,nodes[j].y);ctx.strokeStyle=`rgba(29,184,122,${0.12*(1-d/160)})`;ctx.lineWidth=0.5;ctx.stroke()}}requestAnimationFrame(draw)}addEventListener('resize',resize);resize();draw()}();
+
+const CHAINS=[
+{name:'ПРИВЛЕЧЕНИЕ',color:'#1db87a',accent:'linear-gradient(180deg,#4ade80,#1db87a,#06b6d4)',steps:[
+{name:'Получает направление',type:'human',title:'Направление от врачей',chain:'Привлечение',ai:'human',ag:'—',
+desc:'Основной канал — <strong>сарафанное радио и направления от неврологов</strong>. Последние 9 месяцев от неврологов приходит очень мало — контакт ослаб.',
+desc_quote:'«Самые комфортные клиенты — подруги моих подруг. От неврологов последние 9 месяцев очень мало.»',desc_source:'Блок Б1 анкеты',
+unit_money:null,unit_time:'~2 ч/мес (визиты к врачам)',unit_potential:'При партнёрстве с 5-7 врачами: +5-8 направлений/мес',
+ai_text:'Требует личного визита и доверия. ИИ подготовит буклеты, визитки, памятки «Что делать после ПМПК» для врачей — но контакт строит Наталья.',
+agent_name:null,agent_desc:null,agent_mod:null,
+branch_name:null,branch_pot:null,branch_link:null,
+tool_name:null,tool_steps:null,tool_time:null,
+goal_name:'Увеличить поток клиентов',goal_before:'1-2 направления/мес от 2 неврологов',goal_after:'5-8 направлений/мес от 5-7 врачей + педиатры',
+links:[{color:'#f97316',lbl:'← Удержание → Привлечение',txt:'Рекомендации мам → новые обращения',sub:'Петля сарафана'}]},
+
+{name:'Ведёт 2ГИС / площадки',type:'full',title:'Ведение 2ГИС и площадок',chain:'Привлечение',ai:'full',ag:'КП',
+desc:'Профиль 2ГИС оформлен, ~20 отзывов. Звонков оттуда <strong>мало</strong>. Лидер рынка «Разноцветные цыплята» — 127 оценок, 5.0★.',
+desc_quote:'«Из 2ГИС приходило очень мало звонков.»',desc_source:'Блок Б1 анкеты',
+unit_money:'0 ₽ расход',unit_time:'~1 ч/мес',unit_potential:'При 50+ отзывах: +20-30% обращений через поиск',
+ai_text:'ИИ оптимизирует описание профиля, генерирует ответы на отзывы, создаёт акционные предложения. Автозапрос отзывов → рост рейтинга.',
+agent_name:'Копирайтер',agent_desc:'Пишет описание профиля, ответы на отзывы, акционные тексты для 2ГИС.',agent_mod:'Модуль 02: Контент',
+branch_name:'Лидогенерация',branch_pot:'+300К–600К ₽/год',branch_link:'Рост рейтинга → рост видимости → поток новых клиентов из поиска.',
+tool_name:'Claude AI + 2ГИС',tool_steps:'1) Оптимизация описания. 2) Шаблоны ответов на отзывы. 3) Автозапрос отзывов через бота.',tool_time:'2 часа на настройку',
+goal_name:'100+ отзывов на 2ГИС',goal_before:'~20 отзывов, мало звонков',goal_after:'100+ отзывов, ★5.0, топ выдачи',
+links:[{color:'#2196f3',lbl:'← Контент → Привлечение',txt:'Посты → рост узнаваемости',sub:'Петля контента'}]},
+
+{name:'Публикует в соцсетях',type:'full',title:'Публикации в соцсетях',chain:'Привлечение',ai:'full',ag:'КП',hole:true,
+desc:'<strong>ДЫРА.</strong> Соцсети не ведутся. 928 подписчиков спят. Telegram не создан. Страх критики блокировал контент.',
+desc_quote:'«Боялась ошибиться, боялась критики коллег. Если напишу, что есть места — подумают, что я никому не нужна.»',desc_source:'Блок Б4 анкеты',
+unit_money:'0 ₽',unit_time:'0 ч/нед (ДЫРА)',unit_potential:'При 3-5 постах/нед: +50-100 тыс ₽/мес',
+ai_text:'Голосовое 3 мин → ИИ → пост + хэштеги + описание. 10 постов за 30 минут. Снимает главный барьер — «не знаю что писать».',
+agent_name:'Копирайтер + Ген Агент',agent_desc:'Копирайтер пишет посты в тёплом экспертном стиле Натальи. Ген Агент создаёт контент-план.',agent_mod:'Модуль 02: Контент',
+branch_name:'Контент-машина',branch_pot:'+600К–1.2М ₽/год',branch_link:'Регулярный контент → рост подписчиков → поток записей без рекламы.',
+tool_name:'Claude AI + отложенный постинг',tool_steps:'1) Контент-план на месяц. 2) Пакетная генерация постов. 3) Автопубликация по расписанию.',tool_time:'3 часа на запуск',
+goal_name:'Оживить 928 подписчиков',goal_before:'0 публикаций, аудитория спит',goal_after:'12-16 постов/мес, рост до 3000+ подписчиков',
+links:[{color:'#2196f3',lbl:'← Контент',txt:'Готовые посты → публикация',sub:'Петля контента'}]},
+
+{name:'Отвечает на обращение',type:'boost',title:'Ответ на первое обращение',chain:'Привлечение',ai:'boost',ag:'АВ',
+desc:'Мама звонит или пишет. Наталья отвечает после занятия — <strong>задержка ~1 час</strong>.',
+desc_quote:'«На звонке прошу написать в Макс. Отвечаю после занятия. Может уходить час.»',desc_source:'Блок Б1 анкеты',
+unit_money:null,unit_time:'~3 ч/нед',unit_potential:'ИИ-автоответчик → мгновенный ответ → минус потери',
+ai_text:'ИИ мгновенно отвечает на типовые вопросы (район, цена, время, возраст). Наталья подключается для нестандартных. 1 час → 1 минута.',
+agent_name:'Архитектор воронок',agent_desc:'Создаёт автоответы с презентацией услуг, ценами, расписанием, отзывами.',agent_mod:'Модуль 03: Воронки',
+branch_name:'Лидогенерация',branch_pot:'+300К–600К ₽/год',branch_link:'Быстрый ответ → меньше потерь → больше записей на диагностику.',
+tool_name:'WhatsApp бот + Claude',tool_steps:'1) Собрать FAQ (20 вопросов). 2) Шаблоны ответов. 3) Автоответ с кнопкой записи.',tool_time:'3 часа',
+goal_name:'Сократить время ответа',goal_before:'~1 час ожидания, потенциальные потери',goal_after:'Мгновенный ответ + автозапись',
+links:[]},
+
+{name:'Записывает на диагностику',type:'full',title:'Запись на диагностику',chain:'Привлечение',ai:'full',ag:'АВ',
+desc:'Запись ведётся вручную — переписка + блокнот. Нет онлайн-записи, нет CRM.',
+desc_quote:'«Записываю в блокнот. Нет онлайн-записи.»',desc_source:'Блок Б2 анкеты',
+unit_money:null,unit_time:'~2 ч/нед',unit_potential:'Онлайн-запись: 0 минут на координацию',
+ai_text:'Онлайн-календарь + автоуведомления + напоминание за день. Мама сама выбирает время. Полная автоматизация.',
+agent_name:'Архитектор воронок',agent_desc:'Настраивает онлайн-запись, автоподтверждения, напоминания.',agent_mod:'Модуль 03: Воронки',
+branch_name:'Оптимизация продажи',branch_pot:'+200К–400К ₽/год',branch_link:'Автозапись → меньше потерь → больше диагностик.',
+tool_name:'Онлайн-календарь + бот',tool_steps:'1) Настроить расписание. 2) Ссылка в WhatsApp/Макс. 3) Автонапоминание.',tool_time:'2 часа',
+goal_name:'Автоматизировать запись',goal_before:'Ручная переписка, блокнот',goal_after:'Мама сама записывается, автонапоминание',
+links:[{color:'#0d9488',lbl:'→ Продажа',txt:'Запись → диагностика',sub:'Триггерный'}]}
+]},
+
+{name:'ПРОДАЖА',color:'#7c3aed',accent:'linear-gradient(180deg,#a78bfa,#7c3aed,#ec4899)',steps:[
+{name:'Принимает запрос',type:'boost',title:'Приём запроса',chain:'Продажа',ai:'boost',ag:'АВ',
+desc:'Мама спрашивает район, цену, время. Новые (не по сарафану) <strong>чаще не доходят</strong>.',
+desc_quote:'«Они спрашивают район, цену и время. Если совпадает — встречаемся.»',desc_source:'Блок Б2',
+unit_money:null,unit_time:'~2 ч/нед',unit_potential:'ИИ отвечает на 80% типовых вопросов',
+ai_text:'ИИ отправляет презентацию: услуги, цены, расписание, фото кабинета, отзывы — автоматически. Ускоряет решение мамы.',
+agent_name:'Архитектор воронок',agent_desc:'Создаёт автопрезентацию для первого касания.',agent_mod:'Модуль 03',
+branch_name:'Оптимизация продажи',branch_pot:'+200К–400К ₽/год',branch_link:'Автопрезентация → быстрое решение → больше записей.',
+tool_name:'Claude + шаблон',tool_steps:'1) PDF-презентация услуг. 2) Автоотправка при первом обращении.',tool_time:'2 часа',
+goal_name:'Увеличить конверсию',goal_before:'Мамы уходят «подумать»',goal_after:'Презентация снимает вопросы → запись сразу',
+links:[]},
+
+{name:'Проводит диагностику',type:'human',title:'Диагностика ребёнка (40 мин)',chain:'Продажа',ai:'human',ag:'АО',
+desc:'<strong>Ядро экспертизы.</strong> 40 мин с ребёнком: звукопроизношение, тонус языка, фонематический слух, слоговая структура.',
+desc_source:'Блок Б2 анкеты',
+unit_money:'1 400–1 500 ₽',unit_time:'~5 ч/нед',unit_potential:null,
+ai_text:'Диагностика — живая работа с ребёнком. ИИ готовит бланк ДО и оформляет заключение ПОСЛЕ. Приём — только Наталья.',
+agent_name:'Аналитик-оптимизатор',agent_desc:'Готовит данные ДО встречи. Оформляет заключение после диагностики.',agent_mod:'Модуль 03-04',
+branch_name:null,branch_pot:null,branch_link:null,
+tool_name:null,tool_steps:null,tool_time:null,
+goal_name:'Ядро экспертизы',goal_before:'Тратит время на рутину вокруг',goal_after:'Максимум времени на диагностику и занятия',
+links:[{color:'#0d9488',lbl:'→ Исполнение',txt:'Диагностика → назначение занятий',sub:'Триггерный'}]},
+
+{name:'Подбирает формат',type:'boost',title:'Подбор формата занятий',chain:'Продажа',ai:'boost',ag:'СП',
+desc:'Сейчас <strong>всё запихивает в одно 30-минутное занятие</strong> — звук, чтение, письмо, массаж. Потеря дохода.',
+desc_quote:'«Всё запихиваю в одно занятие. Поняла, что нужно делать допродажи.»',desc_source:'Блок Б2',
+unit_money:null,unit_time:'~1 ч/нед',unit_potential:'Разделение на пакеты: +30-50% к среднему чеку',
+ai_text:'ИИ формирует пакеты по типам нарушений с описаниями для мам. Генерирует сравнительные таблицы. Наталья решает по ребёнку.',
+agent_name:'Создатель посадочных',agent_desc:'Создаёт визуальные пакетные предложения, прайсы, презентации услуг.',agent_mod:'Модуль 04',
+branch_name:'Конверсия + Продуктовая линейка',branch_pot:'+400К–800К ₽/год',branch_link:'Пакеты → рост среднего чека → рост дохода при том же числе клиентов.',
+tool_name:'Claude + Canva',tool_steps:'1) Описание 3-4 пакетов. 2) Красивый PDF-прайс. 3) Автоотправка после диагностики.',tool_time:'3 часа',
+goal_name:'Повысить средний чек',goal_before:'1 400 ₽ за всё разом',goal_after:'Пакеты 5 600–11 200 ₽, цена 1 600-1 800 ₽/занятие',
+links:[]},
+
+{name:'Формирует пакет/КП',type:'full',title:'Формирование пакетного предложения',chain:'Продажа',ai:'full',ag:'СП',
+desc:'Планируется пакетная система: 4 занятия (2 нед) или 8 (месяц). Сейчас — разовая оплата.',
+desc_quote:'«С апреля хочу пакетную систему. Платят за 4 или за 8 занятий.»',desc_source:'Блок Б2',
+unit_money:null,unit_time:'~0.5 ч/нед',unit_potential:'Пакеты + красивое КП = рост чека 1400→1800₽',
+ai_text:'ИИ генерирует пакетные предложения по шаблону: название, состав, цена, выгода. Отправляется маме после диагностики.',
+agent_name:'Создатель посадочных',agent_desc:'Генерирует красивые пакетные предложения для WhatsApp.',agent_mod:'Модуль 04',
+branch_name:'Конверсия',branch_pot:'+400К–800К ₽/год',branch_link:'Красивое КП → мама быстрее решает → выше конверсия.',
+tool_name:'Claude + шаблон',tool_steps:'1) 3-4 шаблона пакетов. 2) Автогенерация под ребёнка. 3) Отправка в WhatsApp.',tool_time:'1 час',
+goal_name:'Пакетная система',goal_before:'Разовая оплата 1 400 ₽',goal_after:'Пакеты 5 600–11 200 ₽, предсказуемый доход',
+links:[]},
+
+{name:'Принимает оплату',type:'boost',title:'Приём оплаты',chain:'Продажа',ai:'boost',ag:'АО',
+desc:'Оплата наличными или Сбер. <strong>Записывает в блокнот</strong>. Нет CRM.',
+desc_quote:'«Переводом на Сбер или наличными. Записываю в блокнот.»',desc_source:'Блок Б2',
+unit_money:null,unit_time:'~1 ч/нед',unit_potential:'Таблица + авточеки = -3-4 ч/мес + прозрачный учёт',
+ai_text:'ИИ ведёт таблицу оплат: кто, когда, за что, сколько. Напоминает о просроченных. Считает месячный итог.',
+agent_name:'Аналитик-оптимизатор',agent_desc:'Ведёт учёт оплат, формирует отчёты, напоминает о задолженностях.',agent_mod:'Модуль 03-04',
+branch_name:null,branch_pot:null,branch_link:null,
+tool_name:'Google Таблицы + Claude',tool_steps:'1) Шаблон учёта. 2) Наталья фиксирует факт. 3) ИИ считает итоги.',tool_time:'1 час',
+goal_name:'Прозрачный учёт',goal_before:'Блокнот, непрозрачно',goal_after:'Электронный учёт, автоматические итоги',
+links:[{color:'#0d9488',lbl:'→ Исполнение',txt:'Оплата → назначение занятий',sub:'Триггерный'}]}
+]},
+
+{name:'ИСПОЛНЕНИЕ',color:'#e8a308',accent:'linear-gradient(180deg,#fbbf24,#e8a308,#f97316)',steps:[
+{name:'Готовит занятие',type:'boost',title:'Подготовка к занятию',chain:'Исполнение',ai:'boost',ag:'ГА',
+desc:'Открывает тетрадку — подбирает материал при ребёнке. <strong>Нет электронных карт прогресса.</strong>',
+desc_quote:'«Специально не готовлюсь. Открываю тетрадку — подбираю при нём.»',desc_source:'Блок Б3',
+unit_money:null,unit_time:'~3 ч/нед',unit_potential:'ИИ ведёт карту ребёнка → быстрый подбор упражнений',
+ai_text:'ИИ ведёт карту прогресса каждого ребёнка: какие звуки поставлены, что в работе. Перед занятием — рекомендует упражнения.',
+agent_name:'Ген Агент',agent_desc:'Ведёт электронные карты прогресса, рекомендует упражнения по нарушению.',agent_mod:'Модуль 02',
+branch_name:null,branch_pot:null,branch_link:null,
+tool_name:'Claude + Google Таблицы',tool_steps:'1) Шаблон карты ребёнка. 2) Наталья диктует итоги. 3) ИИ обновляет и рекомендует.',tool_time:'2 часа',
+goal_name:'Систематизировать работу',goal_before:'Бумажные тетрадки, без системы',goal_after:'Электронные карты, быстрый подбор',
+links:[]},
+
+{name:'Проводит разминку',type:'human',title:'Разминка и нейроупражнения',chain:'Исполнение',ai:'human',ag:'—',
+desc:'Коврик → дыхание → ритм → нейроупражнения → артикуляционная гимнастика → дыхательные.',
+desc_source:'Блок Б3',
+unit_money:null,unit_time:'~10 ч/нед',unit_potential:null,
+ai_text:'Физическая работа — только живой специалист. ИИ подбирает новые упражнения, создаёт видеоинструкции для мам.',
+agent_name:null,agent_desc:null,agent_mod:null,
+branch_name:null,branch_pot:null,branch_link:null,
+tool_name:null,tool_steps:null,tool_time:null,
+goal_name:'Ядро экспертизы',goal_before:null,goal_after:null,
+links:[]},
+
+{name:'Ставит звук / работает',type:'human',title:'Звукопостановка / Чтение-письмо',chain:'Исполнение',ai:'human',ag:'—',
+desc:'<strong>Ядро бизнеса.</strong> 200-300 детей опыт, 90% результат. Нейроподход + зондовый массаж.',
+desc_source:'Блок Б3',
+unit_money:'Основной доход: ~130 000 ₽/мес',unit_time:'~15 ч/нед',unit_potential:null,
+ai_text:'Ядро экспертизы — 5 лет + нейроподход. ИИ не заменяет. ИИ оптимизирует всё ВОКРУГ, чтобы максимум времени шло сюда.',
+agent_name:null,agent_desc:null,agent_mod:null,
+branch_name:null,branch_pot:null,branch_link:null,
+tool_name:null,tool_steps:null,tool_time:null,
+goal_name:'Максимум времени на экспертизу',goal_before:'Рутина отнимает 15+ ч/нед',goal_after:'ИИ закрывает рутину → больше времени на детей',
+links:[{color:'#7c3aed',lbl:'→ Контент',txt:'Результат → материал для поста',sub:'Информационный'},{color:'#d97706',lbl:'→ Удержание',txt:'Завершение курса → сбор отзыва',sub:'Триггерный'}]},
+
+{name:'Даёт ОС маме',type:'boost',title:'Обратная связь маме',chain:'Исполнение',ai:'boost',ag:'ГА',
+desc:'После занятия рассказывает маме прогресс. <strong>Нет формализованных отчётов, нет списков детей.</strong>',
+desc_quote:'«Не делаются промежуточные отчёты — когда появился звук, автоматизировался.»',desc_source:'Блок Б3',
+unit_money:null,unit_time:'~5 ч/нед',unit_potential:'ИИ-отчёт после занятия → +доверие мамы',
+ai_text:'ИИ генерирует краткий отчёт: что делали, прогресс, ДЗ. Наталья диктует ключевое → ИИ оформляет → маме в WhatsApp.',
+agent_name:'Ген Агент',agent_desc:'Создаёт отчёты о прогрессе для родителей по шаблону.',agent_mod:'Модуль 02',
+branch_name:'Удержание / LTV',branch_pot:'+200К–400К ₽/год',branch_link:'Регулярные отчёты → мама видит прогресс → продолжает ходить → рекомендует.',
+tool_name:'Claude + WhatsApp',tool_steps:'1) Шаблон отчёта. 2) Наталья диктует 1 мин. 3) ИИ оформляет и отправляет.',tool_time:'1 час',
+goal_name:'Система отчётности',goal_before:'Устно, без фиксации',goal_after:'Письменный отчёт после каждого занятия',
+links:[]},
+
+{name:'Даёт дом. задание',type:'full',title:'Домашнее задание',chain:'Исполнение',ai:'full',ag:'КП',hole:true,
+desc:'<strong>ДЫРА.</strong> Нет системы домашних заданий. «Всё урывками, кусками, недоделано». Нет видеоинструкций для мам.',
+desc_quote:'«Нет системы домашних заданий — всё урывками, кусками, недоделано.»',desc_source:'Блок Б3',
+unit_money:null,unit_time:'~1 ч/нед (должно быть больше)',unit_potential:'ИИ генерирует ДЗ → рост результата → мама довольна → рекомендует',
+ai_text:'ИИ создаёт персональные задания: карточки с упражнениями, видеоинструкции для мам, игры на закрепление звука. Автоматически после каждого занятия.',
+agent_name:'Копирайтер',agent_desc:'Генерирует карточки ДЗ по типу нарушения, оформляет для WhatsApp.',agent_mod:'Модуль 02',
+branch_name:'Контент-машина',branch_pot:'+600К–1.2М ₽/год',branch_link:'Красивые ДЗ → мама впечатлена → делится → новые клиенты. Материал ДЗ → основа для гайдов.',
+tool_name:'Claude + Canva',tool_steps:'1) Библиотека упражнений по звукам. 2) Шаблон карточки ДЗ. 3) Автогенерация под ребёнка.',tool_time:'3 часа',
+goal_name:'Создать систему ДЗ',goal_before:'Урывками, без системы',goal_after:'Персональное ДЗ после каждого занятия',
+links:[]}
+]},
+
+{name:'КОНТЕНТ',color:'#2196f3',accent:'linear-gradient(180deg,#60a5fa,#2196f3,#06b6d4)',steps:[
+{name:'Планирует контент',type:'full',title:'Контент-план',chain:'Контент',ai:'full',ag:'ГА',hole:true,
+desc:'<strong>ДЫРА.</strong> Контент-плана нет. Регулярности нет. Наталья не ведёт соцсети 5 лет.',
+desc_quote:'«Нет контент-плана, нет регулярности. Нежелание перелопачивать информацию.»',desc_source:'Блок Б4',
+unit_money:'0 ₽',unit_time:'0 ч/нед (ДЫРА)',unit_potential:'ИИ создаёт план на месяц за 15 минут',
+ai_text:'ИИ генерирует план: вирусные темы для мам (экранное время, когда к логопеду, мифы), рубрики, сезонные темы (ПМПК, школа).',
+agent_name:'Ген Агент',agent_desc:'Создаёт еженедельный контент-план с учётом сезонности и трендов.',agent_mod:'Модуль 02',
+branch_name:'Контент-машина',branch_pot:'+600К–1.2М ₽/год',branch_link:'План → регулярность → рост охватов → поток клиентов.',
+tool_name:'Claude AI',tool_steps:'1) Темы на месяц. 2) Рубрики (кейсы, мифы, советы). 3) Расписание по дням.',tool_time:'30 мин/мес',
+goal_name:'Система контента',goal_before:'0 публикаций',goal_after:'12-16 постов/мес по плану',
+links:[]},
+
+{name:'Пишет пост',type:'full',title:'Написание поста',chain:'Контент',ai:'full',ag:'КП',hole:true,
+desc:'<strong>ДЫРА.</strong> Тексты не пишутся. Страх ошибок. При этом знаний — на сотни постов.',
+desc_quote:'«Боялась ошибиться, боялась критики коллег.»',desc_source:'Блок Б4',
+unit_money:'0 ₽',unit_time:'0 ч/нед (ДЫРА)',unit_potential:'Голосовое 3 мин → 3-5 постов. 10 за 30 минут.',
+ai_text:'Наталья записывает голосовое → ИИ превращает в пост: экспертный, тёплый, в её стиле. Барьер «не знаю что писать» исчезает.',
+agent_name:'Копирайтер',agent_desc:'Пишет посты из голосовых в стиле Натальи: тёплый, «по-маминому», экспертный.',agent_mod:'Модуль 02',
+branch_name:'Контент-машина',branch_pot:'+600К–1.2М ₽/год',branch_link:'Посты → охват → узнаваемость → записи.',
+tool_name:'Claude AI',tool_steps:'1) Голосовое 3 мин. 2) ИИ → пост + хэштеги. 3) Правка 2 мин → публикация.',tool_time:'30 мин/нед',
+goal_name:'Регулярный контент',goal_before:'0 публикаций',goal_after:'3-5 постов/нед без стресса',
+links:[{color:'#2196f3',lbl:'→ Привлечение',txt:'Посты → новые мамы',sub:'Петля контента'}]},
+
+{name:'Публикует',type:'full',title:'Публикация контента',chain:'Контент',ai:'full',ag:'КП',hole:true,
+desc:'<strong>ДЫРА.</strong> Иногда WhatsApp-история. Два раза Telegram. Потом удаляет из памяти телефона.',
+desc_quote:'«Снимаю для мамы — потом удаляю из памяти телефона.»',desc_source:'Блок Б4',
+unit_money:'0 ₽',unit_time:'0 ч/нед (ДЫРА)',unit_potential:'Автопостинг: 3-5 постов/нед без участия Натальи',
+ai_text:'Готовые посты публикуются по расписанию: Instagram + Telegram одновременно. Наталья не тратит время.',
+agent_name:'Копирайтер',agent_desc:'Готовит посты к публикации, расставляет по расписанию.',agent_mod:'Модуль 02',
+branch_name:'Контент-машина',branch_pot:'+600К–1.2М ₽/год',branch_link:'Регулярность → алгоритмы показывают больше → рост.',
+tool_name:'SMMplanner / Buffer',tool_steps:'1) Загрузить посты на неделю. 2) Выставить расписание. 3) Автопубликация.',tool_time:'15 мин/нед',
+goal_name:'Автоматическая публикация',goal_before:'Удаляет контент из телефона',goal_after:'Автопостинг IG + TG по расписанию',
+links:[]},
+
+{name:'Снимает Reels',type:'boost',title:'Съёмка Reels / видео',chain:'Контент',ai:'boost',ag:'КП',hole:true,
+desc:'Видео снимались «кустарно» 5 лет назад. Сейчас ничего. Но <strong>видео с малышами цепляли сильнее всего</strong>.',
+desc_quote:'«Больше всего видео с малышами 1,5-2 лет цепляло людей.»',desc_source:'Блок Б1',
+unit_money:null,unit_time:'0 ч/нед (ДЫРА)',unit_potential:'1-2 Reels/нед: сценарий ИИ → съёмка 3 мин → монтаж',
+ai_text:'ИИ пишет сценарий: тема + текст + ракурс. Наталья снимает 2-3 мин на телефон. Вирусные темы: «Когда к логопеду», «5 ошибок мам».',
+agent_name:'Копирайтер',agent_desc:'Пишет сценарии Reels, подбирает вирусные темы для мам.',agent_mod:'Модуль 02',
+branch_name:'Контент-машина',branch_pot:'+600К–1.2М ₽/год',branch_link:'Reels → вирусный охват → поток подписчиков → записи.',
+tool_name:'Claude + CapCut',tool_steps:'1) Сценарий за 1 мин. 2) Съёмка 3 мин. 3) Монтаж в CapCut.',tool_time:'15 мин/видео',
+goal_name:'Запустить видеоконтент',goal_before:'0 видео',goal_after:'1-2 Reels/нед, вирусный охват',
+links:[]},
+
+{name:'Отвечает на FAQ',type:'full',title:'Ответы на FAQ мам',chain:'Контент',ai:'full',ag:'АВ',
+desc:'Мамы задают одни вопросы: когда к логопеду, сколько ходить, почему долго. Наталья тратит время на одинаковые ответы.',
+desc_source:'Блоки Б1-Б2',
+unit_money:null,unit_time:'~2 ч/нед (телефон)',unit_potential:'ИИ отвечает на 90% типовых → -6-8 ч/мес',
+ai_text:'ИИ знает ответы на типовые вопросы: нормы, сроки коррекции, цены, расписание, отличия нарушений. Мгновенно — в комментариях, директе, WhatsApp.',
+agent_name:'Архитектор воронок',agent_desc:'Ведёт базу FAQ, генерирует ответы в директе и комментариях.',agent_mod:'Модуль 03',
+branch_name:'Лидогенерация',branch_pot:'+300К–600К ₽/год',branch_link:'Быстрый ответ на вопрос → доверие → запись.',
+tool_name:'Claude + база знаний',tool_steps:'1) Собрать 30 частых вопросов. 2) Шаблоны ответов. 3) Бот для директа.',tool_time:'2 часа',
+goal_name:'Автоматические FAQ',goal_before:'Одинаковые ответы вручную',goal_after:'90% ответов автоматически',
+links:[]}
+]},
+
+{name:'УДЕРЖАНИЕ',color:'#e04848',accent:'linear-gradient(180deg,#f87171,#e04848,#f97316)',steps:[
+{name:'Собирает отзыв',type:'full',title:'Сбор отзывов (2ГИС)',chain:'Удержание',ai:'full',ag:'МУ',
+desc:'Из 30 попрошенных — 20 написали. Из давних 10 — только 3. <strong>Не знает, сколько раз уместно просить.</strong>',
+desc_quote:'«Из 30 — 20 написали. Не знаю, сколько раз уместно просить.»',desc_source:'Блок Б5',
+unit_money:null,unit_time:'~0.5 ч/нед (нерегулярно)',unit_potential:'Автозапрос → 50+ за 3 мес → топ 2ГИС',
+ai_text:'Автосообщение после курса: благодарность + ссылка на 2ГИС. Через неделю — мягкое напоминание. Без давления.',
+agent_name:'Менеджер удержания',agent_desc:'Создаёт автоматические запросы отзывов, мониторит рейтинг.',agent_mod:'Модуль 04',
+branch_name:'Лидогенерация',branch_pot:'+300К–600К ₽/год',branch_link:'Отзывы → рейтинг → видимость в 2ГИС → новые клиенты.',
+tool_name:'Бот + CRM',tool_steps:'1) Автосообщение через день. 2) Напоминание через неделю. 3) Благодарность за отзыв.',tool_time:'1 час',
+goal_name:'100+ отзывов',goal_before:'~20 отзывов',goal_after:'100+ за 6 мес, ★5.0, топ выдачи',
+links:[{color:'#2196f3',lbl:'→ Привлечение',txt:'Отзывы → доверие',sub:'Информационный'}]},
+
+{name:'Делает рассылку',type:'full',title:'Рассылки и поздравления',chain:'Удержание',ai:'full',ag:'МУ',hole:true,
+desc:'<strong>ДЫРА.</strong> Никому не пишет. Раньше <strong>удаляла контакты</strong>.',
+desc_quote:'«Удаляла контакты — WhatsApp раздувался. Даже мысли не было, что пригодятся.»',desc_source:'Блок Б5',
+unit_money:null,unit_time:'0 ч/нед (ДЫРА)',unit_potential:'Сезонные рассылки: +10-15% возвратов',
+ai_text:'ИИ создаёт сезонные сообщения: «Перед школой проверьте звуки», «Новый год — запишитесь». Автоматически по базе.',
+agent_name:'Менеджер удержания',agent_desc:'Создаёт и отправляет сезонные рассылки, поздравления.',agent_mod:'Модуль 04',
+branch_name:'Удержание / LTV',branch_pot:'+200К–400К ₽/год',branch_link:'Рассылки → возвраты → второй ребёнок → рекомендации.',
+tool_name:'WhatsApp рассылка',tool_steps:'1) Собрать базу. 2) Сезонные шаблоны. 3) Автоотправка по расписанию.',tool_time:'2 часа',
+goal_name:'Не терять клиентов',goal_before:'Удаляла контакты',goal_after:'База + сезонные касания',
+links:[]},
+
+{name:'Звонит через 3 мес',type:'boost',title:'Контрольный звонок',chain:'Удержание',ai:'boost',ag:'МУ',hole:true,
+desc:'<strong>ДЫРА.</strong> Контрольных нет. «Расстаёмся — если потеряется звук, возвращайтесь».',
+desc_quote:'«Расстаёмся. Контрольные встречи не назначаем.»',desc_source:'Блок Б5',
+unit_money:null,unit_time:'0 ч/нед (ДЫРА)',unit_potential:'Контрольный → возвраты + допродажи + рекомендации',
+ai_text:'ИИ напоминает: «Через 3 мес — позвонить маме Пети». Готовит скрипт. Наталья звонит лично — это про доверие.',
+agent_name:'Менеджер удержания',agent_desc:'Ставит напоминания, готовит скрипты контрольных звонков.',agent_mod:'Модуль 04',
+branch_name:'Удержание / LTV',branch_pot:'+200К–400К ₽/год',branch_link:'Контрольный → проверка → допродажа (второй ребёнок, новый курс).',
+tool_name:'CRM + Claude',tool_steps:'1) Автонапоминание через 3 мес. 2) Скрипт разговора. 3) Наталья звонит.',tool_time:'1 час',
+goal_name:'Проактивный контакт',goal_before:'Клиент уходит навсегда',goal_after:'Контрольный → возврат + рекомендация',
+links:[]},
+
+{name:'Предлагает допуслуги',type:'boost',title:'Допродажа услуг',chain:'Удержание',ai:'boost',ag:'МУ',hole:true,
+desc:'<strong>ДЫРА.</strong> Допродаж нет. Но есть возвраты: запуск речи → звукопостановка. Семьи водят второго ребёнка.',
+desc_quote:'«Есть семьи, которые водят второго ребёнка. Есть двоюродные братья.»',desc_source:'Блок Б5',
+unit_money:null,unit_time:'0 ч/нед (ДЫРА)',unit_potential:'Допродажи: массаж, консультации мам, гайды, второй ребёнок',
+ai_text:'ИИ формирует предложения: «У Пети школа — курс чтения», «Гайд для мам 490₽», «Массаж отдельно». Наталья утверждает.',
+agent_name:'Менеджер удержания',agent_desc:'Создаёт персональные допродажи по базе клиентов.',agent_mod:'Модуль 04',
+branch_name:'Конверсия + Продуктовая линейка',branch_pot:'+400К–800К ₽/год',branch_link:'Допродажи → рост LTV → рост дохода без новых клиентов.',
+tool_name:'Claude + база клиентов',tool_steps:'1) Сегментация базы. 2) Персональные предложения. 3) Автоотправка.',tool_time:'2 часа',
+goal_name:'Система допродаж',goal_before:'Всё в одном занятии',goal_after:'Массаж + гайд + курс = рост чека',
+links:[]},
+
+{name:'Запускает рекомендации',type:'full',title:'Реферальная система',chain:'Удержание',ai:'full',ag:'МУ',hole:true,
+desc:'<strong>ДЫРА.</strong> Не просит рекомендовать. Бонусов нет. Сарафан работает пассивно.',
+desc_quote:'«Не прошу рекомендовать. Бонусов нет.»',desc_source:'Блок Б5',
+unit_money:null,unit_time:'0 ч/нед (ДЫРА)',unit_potential:'Рефералы: +3-5 клиентов/мес = +50-70 тыс ₽/мес',
+ai_text:'ИИ создаёт реферальное предложение: «Порекомендуйте — скидка 500₽». Автоматически после курса + через 3 мес.',
+agent_name:'Менеджер удержания',agent_desc:'Запускает реферальную систему, отслеживает рекомендации.',agent_mod:'Модуль 04',
+branch_name:'Удержание / LTV',branch_pot:'+200К–400К ₽/год',branch_link:'Систематические рефералы → предсказуемый поток тёплых клиентов.',
+tool_name:'WhatsApp + учёт',tool_steps:'1) Реферальное предложение. 2) Автоотправка. 3) Учёт бонусов.',tool_time:'1 час',
+goal_name:'Системный сарафан',goal_before:'Пассивно, без системы',goal_after:'+3-5 клиентов/мес по рекомендациям',
+links:[{color:'#f97316',lbl:'→ Привлечение',txt:'Рекомендация → новый клиент',sub:'Петля сарафана'}]}
+]}
+];
+
+const CONNS=[
+{from:'Продажа',to:'Исполнение',color:'#0d9488',type:'Триггерный',txt:'Оплата + запись → назначение занятий'},
+{from:'Исполнение',to:'Контент',color:'#7c3aed',type:'Информационный',txt:'Результат с ребёнком → материал для поста (СЕЙЧАС РАЗОРВАНО)'},
+{from:'Исполнение',to:'Удержание',color:'#d97706',type:'Триггерный',txt:'Завершение курса → сбор отзыва + контрольный'},
+{from:'Контент',to:'Привлечение',color:'#2196f3',type:'Петля возврата',txt:'Посты → новые мамы (СЕЙЧАС НЕ РАБОТАЕТ — 0 постов)'},
+{from:'Удержание',to:'Привлечение',color:'#f97316',type:'Петля сарафана',txt:'Рекомендация → новый клиент (работает пассивно)'}
+];
+
+function svgArr(col){return `<svg viewBox="0 0 22 18"><line x1="2" y1="9" x2="18" y2="9" stroke="${col}" stroke-opacity=".2" stroke-width="1.5"/><circle cy="9" r="2" fill="${col}" opacity=".5"><animate attributeName="cx" from="2" to="18" dur="2s" repeatCount="indefinite"/></circle></svg>`}
+
+const chainsEl=document.getElementById('chains');
+CHAINS.forEach((ch,ci)=>{
+const row=document.createElement('div');row.className='chain';row.style.animationDelay=(ci*.1)+'s';
+const acc=document.createElement('div');acc.className='chain-accent';acc.style.background=ch.accent;row.appendChild(acc);
+const head=document.createElement('div');head.className='chain-head';
+const gc=ch.steps.filter(s=>s.type==='full').length;
+head.innerHTML=`<span class="chain-name" style="color:${ch.color}">${ch.name}</span><span class="chain-pct" style="background:rgba(${ch.color==='#1db87a'?'29,184,122':ch.color==='#7c3aed'?'124,58,237':ch.color==='#e8a308'?'232,163,8':ch.color==='#2196f3'?'33,150,243':'224,72,72'},.08);color:${ch.color}">${gc} из 5 зелёных</span>`;
+row.appendChild(head);
+const sr=document.createElement('div');sr.className='steps';
+ch.steps.forEach((s,si)=>{
+if(si>0){const a=document.createElement('div');a.className='arrow';a.innerHTML=svgArr(ch.color);sr.appendChild(a)}
+const st=document.createElement('div');st.className=`step ${s.type}`;
+let inner=s.name;
+if(s.hole) inner+=`<div class="hole">ДЫРА</div>`;
+if(s.ag&&s.ag!=='—') inner+=`<div class="step-agent">🤖 ${s.ag}</div>`;
+st.innerHTML=inner;
+st.onclick=()=>openModal(s);
+sr.appendChild(st);
+});
+row.appendChild(sr);chainsEl.appendChild(row);
+});
+
+// Conns
+const connsEl=document.getElementById('conns');
+CONNS.forEach(c=>{
+const el=document.createElement('div');el.className='conn';
+el.innerHTML=`<div class="conn-dot" style="color:${c.color};background:${c.color}"></div>${c.from} → ${c.to}`;
+el.onclick=()=>openModal({title:`${c.from} → ${c.to}`,chain:'Переплетение',ai:'full',type:'full',
+desc:c.txt,desc_source:`Тип: ${c.type}`,
+ai_text:c.type==='Триггерный'?'Конец одного звена запускает другое. Идеальное место для автоматизации.':c.type==='Информационный'?'Выход одной цепочки создаёт материал для другой.':'Конец цепочки возвращает в начало — место для управления циклом.',
+links:[]});
+connsEl.appendChild(el);
+});
+
+function openModal(s){
+const labels={full:'🟢 ИИ делает сам',boost:'🟡 ИИ ускоряет ×5–10',human:'🔴 Человек незаменим'};
+const aiT={full:'⚡ Что конкретно делает ИИ',boost:'⚡ Как ИИ ускоряет',human:'👤 Роль человека и поддержка ИИ'};
+const b=document.getElementById('mBadge');b.className=`mbadge ${s.ai}`;b.textContent=labels[s.ai]||'';
+document.getElementById('mTitle').textContent=s.title;
+let h='';
+h+=`<div class="mchain">Цепочка: <b>${s.chain}</b></div>`;
+h+=`<div class="mdesc">${s.desc}</div>`;
+if(s.desc_quote) h+=`<div class="mquote">${s.desc_quote}</div>`;
+if(s.desc_source) h+=`<div class="msrc">📋 ${s.desc_source}</div>`;
+// S2
+if(s.unit_money||s.unit_time){h+=`<div class="msec">📊 Юнит-экономика звена</div><div class="munit">`;
+if(s.unit_money) h+=`<div class="munit-row"><span>💰</span> ${s.unit_money}</div>`;
+if(s.unit_time) h+=`<div class="munit-row"><span>⏱</span> ${s.unit_time}</div>`;
+if(s.unit_potential) h+=`<div class="munit-row hl"><span>📈</span> ${s.unit_potential}</div>`;
+h+=`</div>`}
+// S3
+h+=`<div class="mai ${s.ai}"><div class="mai-t">${aiT[s.ai]||'⚡ ИИ'}</div><div class="mai-txt">${s.ai_text}</div></div>`;
+// S4
+if(s.agent_name){h+=`<div class="msec">🤖 Ответственный агент</div><div class="magent"><div class="magent-name">${s.agent_name}</div><div class="magent-desc">${s.agent_desc}</div><div class="magent-mod">${s.agent_mod}</div></div>`}
+// S5
+if(s.branch_name){h+=`<div class="msec">🚀 Ветка роста</div><div class="mbranch"><div class="mbranch-name">${s.branch_name}</div><div class="mbranch-pot">₽-потенциал: <b>${s.branch_pot}</b></div><div class="mbranch-link">${s.branch_link}</div></div>`}
+// S6
+if(s.tool_name){h+=`<div class="msec">🛠 Рекомендация по внедрению</div><div class="mtool"><div class="mtool-name">${s.tool_name}</div><div class="mtool-steps">${s.tool_steps}</div><div class="mtool-time">⏱ ${s.tool_time}</div></div>`}
+// S7
+if(s.goal_name){h+=`<div class="msec">🎯 Связь с целями бизнеса</div><div class="mgoal"><div class="mgoal-name">Цель: ${s.goal_name}</div>`;
+if(s.goal_before&&s.goal_after){h+=`<div class="mgoal-grid"><div class="mgoal-before"><div class="mgoal-lbl">Без ИИ</div>${s.goal_before}</div><div class="mgoal-after"><div class="mgoal-lbl">С ИИ</div>${s.goal_after}</div></div>`}
+h+=`</div>`}
+// S8
+if(s.links&&s.links.length){h+=`<div class="msec">⚡ Связи с другими звеньями</div><div class="mlinks">`;
+s.links.forEach(l=>{h+=`<div class="ml"><div class="ml-dot" style="background:${l.color};color:${l.color}"></div><div><div class="ml-lbl" style="color:${l.color}">${l.lbl}</div><div class="ml-txt">${l.txt}</div><div class="ml-sub">${l.sub}</div></div></div>`});
+h+=`</div>`}
+document.getElementById('mBody').innerHTML=h;
+document.getElementById('overlay').classList.add('show');document.body.style.overflow='hidden';
+}
+function closeModal(){document.getElementById('overlay').classList.remove('show');document.body.style.overflow=''}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal()});
+</script>
+</body>
+</html>
